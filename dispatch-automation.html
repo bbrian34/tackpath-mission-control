@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dispatch Automation Agent - TackPath Mission Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);
+  --mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;}
+
+#topbar{height:56px;display:flex;align-items:center;padding:0 20px;gap:14px;
+  background:rgba(2,6,14,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:9px;}
+.brand-word{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:500;letter-spacing:1px;}
+.mc-badge{font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:.14em;
+  padding:3px 9px;border-radius:5px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.3);
+  color:var(--gold);text-transform:uppercase;}
+.back-link{margin-left:auto;font-family:var(--mono);font-size:0.75rem;color:var(--blue);text-decoration:none;}
+.mock-note{font-family:var(--mono);font-size:0.68rem;color:var(--faint);padding:10px 20px;
+  background:rgba(255,150,30,.06);border-bottom:1px solid rgba(255,150,30,.15);text-align:center;}
+.mock-note b{color:var(--orange);}
+
+.wrap{max-width:1100px;margin:0 auto;padding:32px 24px 60px;}
+.hdr{margin-bottom:24px;}
+.eyebrow{font-family:var(--mono);font-size:0.7rem;letter-spacing:.18em;color:var(--blue);
+  text-transform:uppercase;margin-bottom:8px;}
+.title{font-size:1.6rem;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;}
+.sub{color:var(--muted);font-size:0.9rem;max-width:640px;}
+
+.stepper{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;}
+.step{flex:1;min-width:150px;padding:12px 14px;border-radius:10px;background:var(--card);
+  border:1px solid var(--border);font-size:0.78rem;text-align:center;color:var(--faint);
+  transition:all .2s;}
+.step.active{border-color:var(--blue);background:rgba(25,183,239,.08);color:var(--blue);font-weight:700;}
+.step.done{border-color:rgba(83,255,136,.3);background:rgba(83,255,136,.06);color:var(--green);}
+
+.btn{padding:11px 20px;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;
+  background:rgba(25,183,239,.12);border:1px solid rgba(25,183,239,.3);color:var(--blue);
+  font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;}
+.btn:hover{background:rgba(25,183,239,.2);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn.reset{background:var(--card2);border-color:var(--border);color:var(--muted);}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px;}
+.panel-title{font-size:0.95rem;font-weight:700;margin-bottom:12px;}
+
+.route-stop{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.route-stop:last-child{border-bottom:none;}
+.stop-num{width:24px;height:24px;border-radius:50%;background:rgba(25,183,239,.12);color:var(--blue);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.7rem;
+  font-weight:700;flex-shrink:0;}
+.stop-info{flex:1;font-size:0.83rem;}
+.stop-addr{color:var(--faint);font-size:0.72rem;}
+
+.driver-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;
+  background:var(--card2);border:1px solid var(--border);font-size:0.82rem;margin:4px 6px 4px 0;}
+.driver-chip.notified{border-color:rgba(255,150,30,.35);background:rgba(255,150,30,.08);}
+.driver-chip.accepted{border-color:rgba(83,255,136,.35);background:rgba(83,255,136,.08);}
+.driver-chip button{background:var(--blue);border:none;color:#000;font-weight:700;font-size:0.7rem;
+  padding:3px 10px;border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+.log-item{font-family:var(--mono);font-size:0.75rem;padding:7px 0;border-bottom:1px solid var(--border);
+  color:var(--muted);}
+.log-item:last-child{border-bottom:none;}
+.log-item b{color:var(--green);}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <svg width="15" height="27" viewBox="0 0 38 70" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="tpg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5dd4f4"/><stop offset="100%" stop-color="#0e7abf"/></linearGradient></defs>
+      <rect x="0" y="22" width="6" height="26" rx="3" fill="url(#tpg)"/>
+      <rect x="12" y="12" width="6" height="46" rx="3" fill="url(#tpg)" opacity=".75"/>
+      <rect x="24" y="4" width="6" height="62" rx="3" fill="url(#tpg)" opacity=".5"/>
+    </svg>
+    <span class="brand-word"><span style="color:#fff;">T Ʌ C K </span><span style="color:var(--blue);">P Ʌ T H</span></span>
+  </div>
+  <div class="mc-badge">Mission Control</div>
+  <a href="index.html" class="back-link">&larr; Back to Mission Control</a>
+</div>
+
+<div class="mock-note"><b>Simulated data only</b> &middot; no real email intake, no real geocoding API calls, no connection to the real TackPath database &middot; nothing here can affect the live product</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="eyebrow">Dispatch Pod</div>
+    <div class="title">Dispatch Automation Agent</div>
+    <div class="sub">Simulates a manifest arriving by upload or email, automatically building the route with no dispatcher click, then broadcasting it to available drivers, who pick the job themselves -- no auto-assignment.</div>
+  </div>
+
+  <div class="stepper">
+    <div class="step" id="step-1">1. Manifest Arrives</div>
+    <div class="step" id="step-2">2. Agent Builds Route</div>
+    <div class="step" id="step-3">3. Broadcast to Drivers</div>
+    <div class="step" id="step-4">4. Driver Accepts</div>
+  </div>
+
+  <div class="panel" id="intakePanel">
+    <div class="panel-title">Step 1: Manifest Intake</div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;">Honest note: real email/upload intake needs infrastructure TackPath doesn't have yet (a dedicated intake address, file parsing pipeline). This button simulates that moment arriving.</div>
+    <button class="btn" onclick="simulateIntake()" id="intakeBtn">&#128231; Simulate manifest arriving (5 stops)</button>
+  </div>
+
+  <div class="panel" id="routePanel" style="display:none;">
+    <div class="panel-title">Step 2: Agent Auto-Built Route</div>
+    <div id="routeList"></div>
+  </div>
+
+  <div class="panel" id="broadcastPanel" style="display:none;">
+    <div class="panel-title">Step 3: Broadcast to Available Drivers</div>
+    <div id="driverList"></div>
+  </div>
+
+  <div class="panel" id="logPanel" style="display:none;">
+    <div class="panel-title">Agent Activity Log</div>
+    <div id="log"></div>
+  </div>
+
+  <button class="btn reset" onclick="resetDemo()" style="margin-top:8px;">&#8635; Reset demo</button>
+</div>
+
+<script>
+let logItems = [];
+const mockStops = [
+  { recipient: 'Marcus Johnson', address: '142 Peachtree St NW' },
+  { recipient: 'Sarah Williams', address: '890 Marietta St NW' },
+  { recipient: 'David Chen', address: '1180 Peachtree St NE' },
+  { recipient: 'Jennifer Davis', address: '75 5th St NW' },
+  { recipient: 'Robert Miller', address: '400 W Peachtree St NW' },
+];
+const availableDrivers = ['Marcus', 'Sarah', 'David'];
+let driverStates = {};
+
+function addLog(html){
+  logItems.unshift({time: new Date().toLocaleTimeString(), html});
+  document.getElementById('logPanel').style.display = 'block';
+  renderLog();
+}
+function renderLog(){
+  document.getElementById('log').innerHTML = logItems.map(item =>
+    `<div class="log-item">[${item.time}] ${item.html}</div>`
+  ).join('');
+}
+function setStep(n, state){
+  document.getElementById('step-'+n).className = 'step ' + state;
+}
+
+function simulateIntake(){
+  document.getElementById('intakeBtn').disabled = true;
+  setStep(1, 'done');
+  addLog('Manifest received &mdash; <b>5 stops</b> detected.');
+  setTimeout(buildRoute, 600);
+}
+
+function buildRoute(){
+  setStep(2, 'active');
+  addLog('Agent auto-sequencing route &mdash; no dispatcher click required.');
+  setTimeout(()=>{
+    document.getElementById('routePanel').style.display = 'block';
+    document.getElementById('routeList').innerHTML = mockStops.map((s,i)=>`
+      <div class="route-stop">
+        <div class="stop-num">${i+1}</div>
+        <div class="stop-info">${s.recipient}<div class="stop-addr">${s.address}, Atlanta GA</div></div>
+      </div>`).join('');
+    setStep(2, 'done');
+    addLog('Route built: <b>5 stops sequenced</b>, ready to broadcast.');
+    setTimeout(broadcastToDrivers, 700);
+  }, 900);
+}
+
+function broadcastToDrivers(){
+  setStep(3, 'active');
+  driverStates = {};
+  availableDrivers.forEach(d => driverStates[d] = 'notified');
+  document.getElementById('broadcastPanel').style.display = 'block';
+  renderDrivers();
+  addLog(`Route automatically broadcast to <b>${availableDrivers.length} available drivers</b>: ${availableDrivers.join(', ')}.`);
+  setStep(3, 'done');
+}
+
+function renderDrivers(){
+  document.getElementById('driverList').innerHTML = availableDrivers.map(d=>{
+    const state = driverStates[d];
+    const cls = state==='accepted' ? 'accepted' : 'notified';
+    const label = state==='accepted' ? '&#10003; Accepted' : 'Notified';
+    const action = state==='accepted' ? '' : `<button onclick="driverAccepts('${d}')">Accept</button>`;
+    return `<div class="driver-chip ${cls}">${d} &middot; ${label} ${action}</div>`;
+  }).join('');
+}
+
+function driverAccepts(name){
+  if(Object.values(driverStates).includes('accepted')) return; // only one driver can accept
+  driverStates[name] = 'accepted';
+  Object.keys(driverStates).forEach(d=>{ if(d!==name) driverStates[d]='expired'; });
+  renderDrivers();
+  setStep(4, 'done');
+  addLog(`<b>${name}</b> accepted the route themselves &mdash; job now assigned. Broadcast automatically closed for other drivers.`);
+}
+
+function resetDemo(){
+  document.getElementById('intakeBtn').disabled = false;
+  document.getElementById('routePanel').style.display = 'none';
+  document.getElementById('broadcastPanel').style.display = 'none';
+  document.getElementById('logPanel').style.display = 'none';
+  logItems = [];
+  [1,2,3,4].forEach(n => setStep(n, ''));
+}
+</script>
+
+</body>
+</html>
