@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Exception Intelligence Agent - TackPath Mission Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--blue:#19b7ef;--green:#53ff88;--orange:#ff961e;--purple:#8d5cff;--red:#ff3b30;--gold:#c9a84c;
+  --bg:#010e21;--card:#071828;--card2:#0d2135;--border:rgba(255,255,255,.07);
+  --text:#eef4ff;--muted:rgba(238,244,255,.65);--faint:rgba(238,244,255,.4);
+  --mono:'DM Mono',monospace;}
+body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;}
+
+#topbar{height:56px;display:flex;align-items:center;padding:0 20px;gap:14px;
+  background:rgba(2,6,14,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:9px;}
+.brand-word{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:500;letter-spacing:1px;}
+.mc-badge{font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:.14em;
+  padding:3px 9px;border-radius:5px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.3);
+  color:var(--gold);text-transform:uppercase;}
+.back-link{margin-left:auto;font-family:var(--mono);font-size:0.75rem;color:var(--blue);text-decoration:none;}
+.mock-note{font-family:var(--mono);font-size:0.68rem;color:var(--faint);padding:10px 20px;
+  background:rgba(255,150,30,.06);border-bottom:1px solid rgba(255,150,30,.15);text-align:center;}
+.mock-note b{color:var(--orange);}
+
+.wrap{max-width:1100px;margin:0 auto;padding:32px 24px 60px;}
+.hdr{margin-bottom:24px;}
+.eyebrow{font-family:var(--mono);font-size:0.7rem;letter-spacing:.18em;color:var(--blue);
+  text-transform:uppercase;margin-bottom:8px;}
+.title{font-size:1.6rem;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;}
+.sub{color:var(--muted);font-size:0.9rem;max-width:600px;}
+
+.controls{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+.btn{padding:9px 16px;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;
+  background:var(--card2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;}
+.btn:hover{border-color:var(--blue);}
+.btn.primary{background:rgba(25,183,239,.12);border-color:rgba(25,183,239,.3);color:var(--blue);}
+
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+@media(max-width:900px){.grid{grid-template-columns:1fr;}}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.panel-title{font-size:0.95rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(83,255,136,.7);}
+
+.job-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
+.job-row:last-child{border-bottom:none;}
+.job-id{font-family:var(--mono);font-size:0.75rem;color:var(--blue);background:rgba(25,183,239,.08);
+  border:1px solid rgba(25,183,239,.15);border-radius:4px;padding:3px 8px;flex-shrink:0;}
+.job-info{flex:1;min-width:0;}
+.job-name{font-size:0.85rem;font-weight:600;}
+.job-meta{font-family:var(--mono);font-size:0.68rem;color:var(--faint);}
+.reason-badge{font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:5px;
+  text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;}
+.reason-badge.late{background:rgba(255,150,30,.12);color:var(--orange);}
+.reason-badge.unassigned{background:rgba(141,92,255,.12);color:var(--purple);}
+.reason-badge.dark{background:rgba(255,59,48,.12);color:var(--red);}
+.reason-badge.fine{background:rgba(83,255,136,.1);color:var(--green);}
+
+.feed-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:0.83rem;}
+.feed-item:last-child{border-bottom:none;}
+.feed-time{font-family:var(--mono);font-size:0.65rem;color:var(--faint);margin-bottom:3px;}
+.feed-msg{color:var(--text);}
+.feed-msg b{color:var(--green);}
+.feed-empty{color:var(--faint);font-size:0.83rem;padding:20px 0;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <svg width="15" height="27" viewBox="0 0 38 70" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="tpg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#5dd4f4"/><stop offset="100%" stop-color="#0e7abf"/></linearGradient></defs>
+      <rect x="0" y="22" width="6" height="26" rx="3" fill="url(#tpg)"/>
+      <rect x="12" y="12" width="6" height="46" rx="3" fill="url(#tpg)" opacity=".75"/>
+      <rect x="24" y="4" width="6" height="62" rx="3" fill="url(#tpg)" opacity=".5"/>
+    </svg>
+    <span class="brand-word"><span style="color:#fff;">T Ʌ C K </span><span style="color:var(--blue);">P Ʌ T H</span></span>
+  </div>
+  <div class="mc-badge">Mission Control</div>
+  <a href="index.html" class="back-link">&larr; Back to Mission Control</a>
+</div>
+
+<div class="mock-note"><b>Simulated data only</b> &middot; no connection to the real TackPath database &middot; nothing here can affect the live product</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="eyebrow">Analytics &amp; Intelligence Pod</div>
+    <div class="title">Exception Intelligence Agent</div>
+    <div class="sub">Detects Late, Unassigned, and Driver Dark exceptions using the same real thresholds as production TackPath, and automatically sends a check-in message the moment Driver Dark is detected -- all against simulated jobs for this demo.</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" onclick="loadScenario()">Load a new simulated scenario</button>
+    <button class="btn" onclick="advanceTime()">Advance simulated time +20 min</button>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-title"><div class="dot"></div>Simulated Jobs</div>
+      <div id="jobList"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><div class="dot" style="background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.7);"></div>Agent Activity Feed</div>
+      <div id="feed"><div class="feed-empty">No agent activity yet. Load a scenario to begin.</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let simNow = Date.now();
+let jobs = [];
+let feedItems = [];
+let messagedDrivers = new Set(); // tracks who's already gotten a check-in, so we don't spam
+let flaggedJobs = new Set(); // tracks which unassigned jobs have already been flagged, so we don't spam
+
+function minutesAgo(mins){ return new Date(simNow - mins*60000).toISOString(); }
+function minutesFromNow(mins){ return new Date(simNow + mins*60000).toISOString(); }
+
+function loadScenario(){
+  simNow = Date.now();
+  messagedDrivers = new Set();
+  flaggedJobs = new Set();
+  feedItems = [];
+  jobs = [
+    { id: 'job-1', title: 'Downtown Delivery', driver_name: 'Marcus', status: 'in_transit',
+      created_at: minutesAgo(90), estimated_delivery_at: minutesAgo(15), last_location_update: minutesAgo(5) },
+    { id: 'job-2', title: 'Westside Route', driver_name: null, status: 'pending',
+      created_at: minutesAgo(22), estimated_delivery_at: null, last_location_update: null },
+    { id: 'job-3', title: 'Airport Run', driver_name: 'Sarah', status: 'in_transit',
+      created_at: minutesAgo(60), estimated_delivery_at: minutesFromNow(20), last_location_update: minutesAgo(35) },
+    { id: 'job-4', title: 'Midtown Express', driver_name: 'David', status: 'in_transit',
+      created_at: minutesAgo(30), estimated_delivery_at: minutesFromNow(15), last_location_update: minutesAgo(2) },
+  ];
+  render();
+  runAgent();
+}
+
+function advanceTime(){
+  simNow += 20*60000; // move simulated clock forward 20 minutes
+  render();
+  runAgent();
+}
+
+// Same real thresholds as production: Late = past estimated_delivery_at,
+// Unassigned = pending > 15 min, Driver Dark = no location update > 30 min
+function detectException(job){
+  if(job.status==='in_transit' && job.estimated_delivery_at && simNow > new Date(job.estimated_delivery_at).getTime()){
+    return {reason:'Late', label:'late'};
+  }
+  if(job.status==='pending' && (simNow - new Date(job.created_at).getTime()) > 15*60*1000){
+    return {reason:'Unassigned', label:'unassigned'};
+  }
+  if(job.status==='in_transit' && job.last_location_update && (simNow - new Date(job.last_location_update).getTime()) > 30*60*1000){
+    return {reason:'Driver Dark', label:'dark'};
+  }
+  return null;
+}
+
+function addFeedItem(html){
+  feedItems.unshift({time: new Date(simNow).toLocaleTimeString(), html});
+}
+
+function runAgent(){
+  jobs.forEach(job=>{
+    const exc = detectException(job);
+    if(exc && exc.label==='dark' && !messagedDrivers.has(job.driver_name)){
+      messagedDrivers.add(job.driver_name);
+      addFeedItem(`Agent detected <b>Driver Dark</b> on "${job.title}" (${job.driver_name}) &mdash; automatically sent check-in message: <i>"Hey ${job.driver_name}, can you confirm your current status?"</i>`);
+    }
+    if(exc && exc.label==='unassigned' && !flaggedJobs.has(job.id)){
+      flaggedJobs.add(job.id);
+      addFeedItem(`Agent detected <b>Unassigned</b> job "${job.title}" past 15 min &mdash; flagged as high priority in dispatch queue.`);
+    }
+  });
+  renderFeed();
+}
+
+function render(){
+  const list = document.getElementById('jobList');
+  list.innerHTML = jobs.map(job=>{
+    const exc = detectException(job);
+    const label = exc ? exc.reason : 'On Track';
+    const cls = exc ? exc.label : 'fine';
+    return `<div class="job-row">
+      <div class="job-id">${job.id}</div>
+      <div class="job-info">
+        <div class="job-name">${job.title}</div>
+        <div class="job-meta">${job.driver_name || 'Unassigned'} &middot; ${job.status.replace('_',' ')}</div>
+      </div>
+      <div class="reason-badge ${cls}">${label}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderFeed(){
+  const feed = document.getElementById('feed');
+  if(!feedItems.length){
+    feed.innerHTML = '<div class="feed-empty">No exceptions detected yet.</div>';
+    return;
+  }
+  feed.innerHTML = feedItems.map(item=>`
+    <div class="feed-item">
+      <div class="feed-time">${item.time}</div>
+      <div class="feed-msg">${item.html}</div>
+    </div>`).join('');
+}
+
+loadScenario();
+</script>
+
+</body>
+</html>
