@@ -45,9 +45,26 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);background
 
 .section-lbl{font-family:var(--mono);font-size:0.72rem;letter-spacing:.14em;color:var(--muted);
   text-transform:uppercase;margin:36px 0 14px;}
+
+#mc-nav{height:36px;display:flex;align-items:center;padding:0 20px;gap:6px;
+  background:rgba(2,6,14,.97);border-bottom:1px solid rgba(201,168,76,.15);
+  font-family:'DM Mono',monospace;font-size:0.65rem;}
+.mcnav-home{color:rgba(201,168,76,.8);text-decoration:none;font-weight:700;letter-spacing:.08em;margin-right:8px;}
+.mcnav-sep{color:rgba(255,255,255,.15);margin:0 4px;}
+.mcnav-link{color:rgba(238,244,255,.4);text-decoration:none;padding:3px 8px;border-radius:4px;transition:all .15s;}
+.mcnav-link:hover{color:#eef4ff;background:rgba(255,255,255,.05);}
+.mcnav-link.active{color:#c9a84c;background:rgba(201,168,76,.08);}
 </style>
 </head>
 <body>
+<div id="mc-nav">
+  <a class="mcnav-home" href="index.html">MISSION CONTROL</a>
+  <span class="mcnav-sep">|</span>
+  <a class="mcnav-link active" href="index.html">Overview</a>
+  <a class="mcnav-link " href="exception-agent.html">Exception Intelligence</a>
+  <a class="mcnav-link " href="dispatch-automation.html">Dispatch Automation</a>
+</div>
+
 
 <div id="topbar">
   <div class="brand">
